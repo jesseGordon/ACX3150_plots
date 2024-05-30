@@ -13,6 +13,9 @@ companies = {
     'Experience Co (EXP)': 'EXP-2018-2023.xlsx'
 }
 
+negative_net_profit_margin = {}
+
+
 # Load and clean the data
 data_clean = {}
 for ticker, file in companies.items():
