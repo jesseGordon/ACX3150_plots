@@ -43,12 +43,11 @@ def calculate_altman_z_score(file_path, stock_price, fiscal_year_col):
     E = market_value_of_equity
     F = total_liabilities
     G = sales
-    H = total_assets
     print(f'Company: {file_path.split("/")[-1].split("-")[0]}')
-    print(f'Working Capital: {working_capital}, Total Assets: {total_assets}, Retained Earnings: {C}, EBIT: {D}, Market Value of Equity: {E}, Total Liabilities: {F}, Sales: {G}, Total Assets: {H}')
+    print(f'Working Capital: {working_capital}, Total Assets: {total_assets}, Retained Earnings: {C}, EBIT: {D}, Market Value of Equity: {E}, Total Liabilities: {F}, Sales: {G}, Total Assets: {B}')
 
     # Altman Z-Score calculation
-    Z = 1.2 * (A / B) + 1.4 * (C / B) + 3.3 * (D / B) + 0.6 * (E / F) + 1.0 * (G / H)
+    Z = 1.2 * (A / B) + 1.4 * (C / B) + 3.3 * (D / B) + 0.6 * (E / F) + 1.0 * (G / B)
     
     # Calculate Z-scores for different share prices
     stock_prices = [stock_price * (1 + i / 100) for i in range(-20, 21)]
@@ -57,7 +56,7 @@ def calculate_altman_z_score(file_path, stock_price, fiscal_year_col):
     for price in stock_prices:
         market_value_of_equity = shares_outstanding * price
         E = market_value_of_equity
-        Z = 1.2 * (A / B) + 1.4 * (C / B) + 3.3 * (D / B) + 0.6 * (E / F) + 1.0 * (G / H)
+        Z = 1.2 * (A / B) + 1.4 * (C / B) + 3.3 * (D / B) + 0.6 * (E / F) + 1.0 * (G / B)
         z_scores.append(Z)
     
     return stock_prices, z_scores

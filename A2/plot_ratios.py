@@ -13,7 +13,7 @@ companies = {
     'Experience Co (EXP)': 'EXP-2018-2023.xlsx'
 }
 
-negative_net_profit_margin = {}
+negative_years = {}
 
 
 # Load and clean the data
@@ -35,6 +35,23 @@ def filter_clean_ratio_data_common(data, ratio_name):
         ratio_data = pd.Series([np.nan] * len(years_common), index=years_common)
     return ratio_data
 
+negative_years = {}
+for ticker, clean_data in data_clean.items():
+    data = filter_clean_ratio_data_common(clean_data, 'Net Profit Margin (%)')
+    negative_years[ticker] = [year for year, value in zip(years_common, data) if value < 0]
+# Create dictionary to track tickers with negative profit margins by year
+year_tickers_negative = {year: [] for year in years_common}
+for ticker, years in negative_years.items():
+    # Extract ticker within parentheses
+    ticker_symbol = ticker[ticker.find("(")+1:ticker.find(")")]
+    for year in years:
+        year_tickers_negative[year].append(ticker_symbol)
+
+# Format the summary text for annotations
+negative_summary_by_year = {year: f"Negative Profit: \n{', '.join(tickers)}" if tickers else "" for year, tickers in year_tickers_negative.items()}
+
+
+print(year_tickers_negative)
 # Define the ratios and titles for the plots
 ratios = {
     'Net Profit Margin (%)': 'Net Profit Margin (%) (Profitability Analysis)',
@@ -104,6 +121,7 @@ if INDIVIDUAL:
     for category in categories:
         os.makedirs(os.path.join(base_path, category), exist_ok=True)
 
+    
     # Generate and save plots
     for ratio, title in ratios.items():
         category_folder = next((category for category in categories if category in title), None)
@@ -116,12 +134,22 @@ if INDIVIDUAL:
 
         for ticker, clean_data in data_clean.items():
             ratio_data = filter_clean_ratio_data_common(clean_data, ratio)
+            
             ax.plot(years_common, ratio_data.values, marker='o', linestyle='-', label=f'{ticker}')
             ratio_values.append(ratio_data.values)
 
         # Calculate and plot the average
         average_ratio = np.nanmean(ratio_values, axis=0)
         ax.plot(years_common, average_ratio, marker='*', linestyle='-', linewidth=2, color='k', label='Average')
+
+        # After plotting the data but before showing or saving the figure
+        for year in years_common:
+            if negative_summary_by_year[year]:  # This checks if there is any ticker with a negative profit for the year
+                # Calculate x position based on the index of the year in years_common
+                x_pos = years_common.index(year)
+                # Display the text at the top of the graph for each year
+                ax.text(x_pos, ax.get_ylim()[0], negative_summary_by_year[year], horizontalalignment='center', verticalalignment='bottom', color='red', fontsize=7)
+
 
         ax.set_title(title)
         ax.set_xlabel('Year')
